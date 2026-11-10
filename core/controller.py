@@ -46,11 +46,8 @@ class Controller:
             return
 
         # 2) режимы
-        if self.mode == "on":
-            self.relay.set(True)
-            return
-        if self.mode == "off":
-            self.relay.set(False)
+        if self.mode in ("on", "off"):
+            self._apply_mode()
             return
 
         # 3) auto с гистерезисом
@@ -71,6 +68,15 @@ class Controller:
         if mode not in ("auto", "on", "off"):
             raise ValueError("mode must be one of: auto, on, off")
         self.mode = mode
+        self._apply_mode()
+
+    def _apply_mode(self) -> None:
+        """Сразу применить текущий режим к реле (без ожидания тика)."""
+        if self.mode == "on":
+            self.relay.set(True)
+        elif self.mode == "off":
+            self.relay.set(False)
+        # в auto реле переключит ближайший тик по гистерезису
 
     def set_thresholds(self, on_below: float, off_above: float) -> None:
         if not (0 <= on_below < off_above <= 100):
