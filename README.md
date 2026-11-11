@@ -52,3 +52,18 @@ sensor -> Controller -> relay
 4. Тесты для логики гистерезиса.
 5. Реализация `hardware/raspberry.py` (для будущего запуска на Pi).
 6. Android-приложение (следующий семестр).
+
+## Как запустить (mock mode)
+
+    python3 -m venv venv
+    source venv/bin/activate
+    pip install -r requirements.txt
+    python app.py
+
+В другом терминале:
+
+    curl http://localhost:5000/api/status
+    curl -X POST http://localhost:5000/api/mode \
+      -H "Content-Type: application/json" -d '{"mode": "auto"}'
+    curl -X POST http://localhost:5000/api/thresholds \
+      -H "Content-Type: application/json" -d '{"on_below": 45, "off_above": 55}'
