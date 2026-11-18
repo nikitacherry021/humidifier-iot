@@ -67,3 +67,10 @@ sensor -> Controller -> relay
       -H "Content-Type: application/json" -d '{"mode": "auto"}'
     curl -X POST http://localhost:5000/api/thresholds \
       -H "Content-Type: application/json" -d '{"on_below": 45, "off_above": 55}'
+
+## Сохранение настроек
+
+Режим работы (`auto` / `on` / `off`) и пороги влажности сохраняются в
+`storage/settings.json` при каждом изменении через API. При старте сервер
+подхватывает последние сохранённые значения. Файл создаётся автоматически,
+в Git не попадает (см. `.gitignore`).

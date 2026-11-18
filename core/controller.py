@@ -7,9 +7,11 @@ from hardware.base import HumiditySensor, Relay
 
 
 class Controller:
-    def __init__(self, sensor: HumiditySensor, relay: Relay):
+    def __init__(self, sensor: HumiditySensor, relay: Relay,
+                 settings_store=None):
         self.sensor = sensor
         self.relay = relay
+        self.settings_store = settings_store
         self.mode = config.MODE
         self.on_below = config.ON_BELOW
         self.off_above = config.OFF_ABOVE
@@ -18,6 +20,23 @@ class Controller:
         self.last_error = None
         self._stop = threading.Event()
         self._thread = None
+        if self.settings_store is not None:
+            self._load_settings()
+
+    def _load_settings(self) -> None:
+        data = self.settings_store.load()
+        self.mode = data["mode"]
+        self.on_below = float(data["on_below"])
+        self.off_above = float(data["off_above"])
+
+    def _save_settings(self) -> None:
+        if self.settings_store is None:
+            return
+        self.settings_store.save({
+            "mode": self.mode,
+            "on_below": self.on_below,
+            "off_above": self.off_above,
+        })
 
     # --- жизненный цикл ---
 
@@ -69,6 +88,7 @@ class Controller:
             raise ValueError("mode must be one of: auto, on, off")
         self.mode = mode
         self._apply_mode()
+        self._save_settings()
 
     def _apply_mode(self) -> None:
         """Сразу применить текущий режим к реле (без ожидания тика)."""
@@ -83,6 +103,7 @@ class Controller:
             raise ValueError("require 0 <= on_below < off_above <= 100")
         self.on_below = float(on_below)
         self.off_above = float(off_above)
+        self._save_settings()
 
     def status(self) -> dict:
         return {

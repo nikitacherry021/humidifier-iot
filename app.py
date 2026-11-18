@@ -10,6 +10,7 @@ from flask import Flask, jsonify
 
 from api.routes import create_blueprint
 from core.controller import Controller
+from core.settings_store import SettingsStore
 from hardware.mock import MockHumiditySensor, MockRelay
 
 
@@ -20,7 +21,8 @@ def build_controller() -> Controller:
         relay = MockRelay()
     else:
         raise RuntimeError(f"HARDWARE={hardware} not implemented yet")
-    return Controller(sensor, relay)
+    store = SettingsStore()
+    return Controller(sensor, relay, settings_store=store)
 
 
 def create_app() -> Flask:
